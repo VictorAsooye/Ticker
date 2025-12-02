@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Saved investments subcollection
+      match /saved_investments/{investmentId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Swipe history subcollection
+      match /swipe_history/{swipeId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Cache for generated cards (read-only for clients)
+    match /card_cache/{cacheId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only functions can write
+    }
+  }
+}
+
